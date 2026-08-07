@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/live.css">
 </head>
 <body>
   <header class="topbar">
@@ -41,10 +41,10 @@
   </main>
 
   <dialog id="storyDialog" class="story-dialog"><button class="close" data-close>×</button><div id="storyView"></div></dialog>
-  <dialog id="authDialog" class="auth-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl.</span><h2>Hikâyen burada başlıyor.</h2><p>Okumaya, yazmaya ve kendi kütüphaneni oluşturmaya devam et.</p><div class="tabs"><button class="active">Giriş yap</button><button>Kayıt ol</button></div><form id="authForm"><label>E-posta<input type="email" required placeholder="sen@ornek.com"></label><label>Şifre<input type="password" required minlength="6" placeholder="En az 6 karakter"></label><button class="ink large">Devam et →</button></form><small>Devam ederek kullanım koşullarını kabul etmiş olursun.</small></dialog>
+  <dialog id="authDialog" class="auth-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl.</span><h2>Hikâyen burada başlıyor.</h2><p>Okumaya, yazmaya ve kendi kütüphaneni oluşturmaya devam et.</p><div class="tabs" id="authTabs"><button class="active" data-mode="login">Giriş yap</button><button data-mode="register">Kayıt ol</button></div><form id="authForm"><label id="nameField" hidden>Görünen ad<input id="authName" placeholder="Adın veya mahlasın"></label><label>E-posta<input id="authEmail" type="email" required placeholder="sen@ornek.com"></label><label>Şifre<input id="authPassword" type="password" required minlength="6" placeholder="En az 6 karakter"></label><p class="form-message" id="authMessage"></p><button class="ink large">Devam et →</button></form><small>Devam ederek kullanım koşullarını kabul etmiş olursun.</small></dialog>
   <dialog id="writeDialog" class="write-dialog"><button class="close" data-close>×</button><div class="studio-head"><span class="mini-brand">fasl.</span><span id="saveState">Taslak</span></div><form id="writeForm"><label class="overline">YENİ ESER</label><input id="draftTitle" class="title-input" placeholder="Hikâyenin adı" required><div class="write-meta"><input id="draftGenre" placeholder="Tür (örn. Fantastik)"><input id="draftTags" placeholder="Etiketler"></div><textarea id="draftText" placeholder="Bir varmış, bir yokmuş..." required></textarea><div class="studio-actions"><span id="wordCount">0 kelime</span><button type="button" class="ghost" id="saveDraft">Taslağı kaydet</button><button class="ink">Bölümü yayımla →</button></div></form></dialog>
 
   <footer><a class="brand" href="#"><span>F</span> fasl.</a><p>Her hikâye bir fasıl ile başlar.</p><span>© 2026 Fasl</span></footer>
-  <script src="/app.js"></script>
+  <script src="/config.js"></script><script src="/app.js"></script>
 </body>
 </html>
