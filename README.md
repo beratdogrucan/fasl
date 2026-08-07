@@ -20,3 +20,8 @@ Ardından `http://localhost:3000` adresini açın.
 - Giriş/kayıt arayüzü
 - Mobil uyumlu tasarım
 
+## Supabase bağlantısı
+
+`supabase/schema.sql` dosyası yeni ve ayrı bir Supabase projesinin SQL Editor ekranında çalıştırılmalıdır. Şema; kullanıcı profilleri, eserler, bölümler, kütüphane, yorumlar, beğeniler ve takipler için tabloları ve satır düzeyi güvenlik kurallarını içerir.
+
+Çizgi'nin Supabase projesini Fasl için yeniden kullanmayın. `.env.example` dosyasını `.env` olarak kopyalayıp Fasl'a ait proje bilgileriyle doldurun; service-role anahtarını hiçbir zaman tarayıcı koduna veya GitHub'a eklemeyin.
