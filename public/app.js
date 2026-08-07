@@ -9,6 +9,8 @@ let stories=[...demoStories],session=JSON.parse(localStorage.getItem('fasl-sessi
 const $=selector=>document.querySelector(selector),esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const grid=$('#storyGrid'),bookPage=$('#bookPage'),bookPageView=$('#bookPageView'),storyDialog=$('#storyDialog'),authDialog=$('#authDialog'),writeDialog=$('#writeDialog'),libraryDialog=$('#libraryDialog'),accountDialog=$('#accountDialog'),manageDialog=$('#manageDialog'),authorDialog=$('#authorDialog'),notificationsDialog=$('#notificationsDialog'),adminDialog=$('#adminDialog');
 const {supabaseUrl:SB_URL,supabaseKey:SB_KEY}=window.FASL_CONFIG;
+const bookPageObserver=new MutationObserver(()=>{const actions=bookPageView.querySelector('.detail-actions');if(actions&&!actions.querySelector('[data-start-reading]'))actions.insertAdjacentHTML('afterbegin','<button class="ink start-reading" data-start-reading>Okumaya başla →</button>')});
+bookPageObserver.observe(bookPageView,{childList:true,subtree:true});
 
 async function sb(path,{method='GET',body,token=session?.access_token}={}){const response=await fetch(`${SB_URL}${path}`,{method,headers:{apikey:SB_KEY,Authorization:`Bearer ${token||SB_KEY}`,'Content-Type':'application/json',Prefer:'return=representation'},body:body?JSON.stringify(body):undefined});const data=response.status===204?null:await response.json().catch(()=>null);if(!response.ok)throw new Error(data?.msg||data?.message||data?.error_description||data?.hint||'İşlem tamamlanamadı.');return data}
 function requireSession(next){if(session)return true;authDialog.showModal();$('#authMessage').textContent='Bu işlem için giriş yapmalısın.';return false}
@@ -62,6 +64,7 @@ document.addEventListener('click',async e=>{
   const manageTab=e.target.closest('[data-manage-tab]');if(manageTab)renderManage(manageTab.dataset.manageTab);
   const deleteButton=e.target.closest('[data-delete-book]');if(deleteButton)deleteBook(deleteButton.dataset.deleteBook,deleteButton.dataset.bookTitle);
   if(e.target.closest('[data-new-story]')){accountDialog.close();writeDialog.showModal()}
+  if(e.target.closest('[data-start-reading]'))document.querySelector('.reading-zone')?.scrollIntoView({behavior:'smooth',block:'start'});
   if(e.target.closest('[data-notifications]'))openNotifications();
   if(e.target.closest('[data-admin]'))openAdmin();
   const follow=e.target.closest('[data-follow]');if(follow)toggleFollow(follow.dataset.follow);
