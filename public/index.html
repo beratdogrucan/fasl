@@ -15,7 +15,7 @@
     <a class="brand" href="#" aria-label="Fasl ana sayfa"><span>F</span> fasl.</a>
     <nav><a href="#kesfet">Keşfet</a><a href="#" data-library>Kütüphanem</a><a href="#topluluk">Topluluk</a><a href="#" data-account>Hesabım</a></nav>
     <label class="search"><span>⌕</span><input id="search" placeholder="Hikâye, yazar veya tür ara"></label>
-    <div class="actions"><button class="ghost" data-auth>Giriş yap</button><button class="ink" data-write>Yazmaya başla <span>↗</span></button></div>
+    <div class="actions"><button class="notification-button" data-notifications aria-label="Bildirimler">♢<span id="notificationCount" hidden>0</span></button><button class="ghost" data-auth>Giriş yap</button><button class="ink" data-write>Yazmaya başla <span>↗</span></button></div>
   </header>
 
   <main>
@@ -47,6 +47,9 @@
   <dialog id="libraryDialog" class="panel-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl.</span><h2>Kütüphanem</h2><p>Sonra okumak için ayırdığın hikâyeler.</p><div id="libraryList" class="panel-list"></div></dialog>
   <dialog id="accountDialog" class="panel-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl.</span><h2>Hesabım</h2><div id="accountView"></div></dialog>
   <dialog id="manageDialog" class="manage-dialog"><button class="close" data-close>×</button><div id="manageView"></div></dialog>
+  <dialog id="authorDialog" class="panel-dialog author-dialog"><button class="close" data-close>×</button><div id="authorView"></div></dialog>
+  <dialog id="notificationsDialog" class="panel-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl.</span><h2>Bildirimler</h2><div id="notificationsView" class="notification-list"></div></dialog>
+  <dialog id="adminDialog" class="admin-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl. yönetim</span><h2>Yönetici Paneli</h2><div id="adminView"></div></dialog>
   <dialog id="authDialog" class="auth-dialog"><button class="close" data-close>×</button><span class="mini-brand">fasl.</span><h2>Hikâyen burada başlıyor.</h2><p>Okumaya, yazmaya ve kendi kütüphaneni oluşturmaya devam et.</p><div class="tabs" id="authTabs"><button class="active" data-mode="login">Giriş yap</button><button data-mode="register">Kayıt ol</button></div><form id="authForm"><label id="nameField" hidden>Görünen ad<input id="authName" placeholder="Adın veya mahlasın"></label><label>E-posta<input id="authEmail" type="email" required placeholder="sen@ornek.com"></label><label id="passwordField">Şifre<input id="authPassword" type="password" required minlength="6" placeholder="En az 6 karakter"></label><button type="button" class="forgot-link" id="forgotPassword">Şifremi unuttum</button><p class="form-message" id="authMessage"></p><button class="ink large">Devam et →</button></form><small>Devam ederek kullanım koşullarını kabul etmiş olursun.</small></dialog>
   <dialog id="writeDialog" class="write-dialog"><button class="close" data-close>×</button><div class="studio-head"><span class="mini-brand">fasl.</span><span id="saveState">Taslak</span></div><form id="writeForm"><label class="overline">YENİ ESER</label><input id="draftTitle" class="title-input" placeholder="Hikâyenin adı" required><div class="write-meta"><input id="draftGenre" placeholder="Tür (örn. Fantastik)"><input id="draftTags" placeholder="Etiketler"></div><textarea id="draftText" placeholder="Bir varmış, bir yokmuş..." required></textarea><div class="studio-actions"><span id="wordCount">0 kelime</span><button type="button" class="ghost" id="saveDraft">Taslağı kaydet</button><button class="ink">Bölümü yayımla →</button></div></form></dialog>
 
