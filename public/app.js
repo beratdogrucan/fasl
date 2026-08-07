@@ -5,7 +5,7 @@ const demoStories=[
  {id:'mars-34',title:'Mars’a 34 Dakika',author:'Can Ilgaz',genre:'Bilim Kurgu',reads:'56B',likes:'4,2B',color:'#654637',accent:'#d88d55',desc:'Dünya ile Mars arasındaki son bağlantı kesilmeden önce gönderilebilecek tek bir mesaj kaldı.',excerpt:'Ekranın köşesindeki sayaç 34:00’ı gösterdi.'},
  {id:'koridor-17',title:'17. Koridor',author:'Selin Mor',genre:'Genç Kurgu',reads:'43B',likes:'3,9B',color:'#34495a',accent:'#c6af7f',desc:'Yeni okulunda olmayan bir koridoru görebilen Ela, kayıp öğrencilerin izini sürer.',excerpt:'Okulun planında on altı koridor vardı. Ela bunu üç kez saymıştı.'}
 ];
-let stories=[...demoStories],session=JSON.parse(localStorage.getItem('fasl-session')||'null'),authMode='login',readerState=null,manageState=null,currentProfile=null;
+let stories=[...demoStories],session=JSON.parse(localStorage.getItem('fasl-session')||'null'),authMode='login',readerState=null,readingMode=false,manageState=null,currentProfile=null;
 const $=selector=>document.querySelector(selector),esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const grid=$('#storyGrid'),bookPage=$('#bookPage'),bookPageView=$('#bookPageView'),storyDialog=$('#storyDialog'),authDialog=$('#authDialog'),writeDialog=$('#writeDialog'),libraryDialog=$('#libraryDialog'),accountDialog=$('#accountDialog'),manageDialog=$('#manageDialog'),authorDialog=$('#authorDialog'),notificationsDialog=$('#notificationsDialog'),adminDialog=$('#adminDialog');
 const {supabaseUrl:SB_URL,supabaseKey:SB_KEY}=window.FASL_CONFIG;
@@ -31,6 +31,8 @@ async function loadStories(){
     render();renderRankings();
     const route=decodeURIComponent(location.hash.replace(/^#kitap\//,''));
     if(bookPage.hidden&&location.hash.startsWith('#kitap/')&&stories.some(s=>s.id===route))openStory(route,false)
+    const readingRoute=location.hash.match(/^#oku\/([^/]+)\/(\d+)$/);
+    if(bookPage.hidden&&readingRoute){const readingId=decodeURIComponent(readingRoute[1]);if(stories.some(s=>s.id===readingId)){await openStory(readingId,false);openReadingPage(Number(readingRoute[2])-1)}}
   }catch(e){console.warn('Canlı hikâyeler alınamadı:',e.message)}
 }
 function updateSessionUi(){const b=$('[data-auth]');b.textContent=session?'Hesabım':'Giriş yap';delete b.dataset.logout;updateNotificationCount()}
@@ -53,7 +55,7 @@ async function updateNotificationCount(){const badge=$('#notificationCount');if(
 async function openNotifications(){if(!requireSession())return;notificationsDialog.showModal();$('#notificationsView').innerHTML='Bildirimler yükleniyor…';try{const rows=await sb(`/rest/v1/notifications?select=id,title,body,story_id,read_at,created_at&user_id=eq.${session.user.id}&order=created_at.desc&limit=50`);$('#notificationsView').innerHTML=rows?.length?rows.map(n=>`<button ${n.story_id?`data-story="${n.story_id}"`:''} class="${n.read_at?'':'unread'}"><b>${esc(n.title)}</b><span>${esc(n.body)}</span><time>${new Date(n.created_at).toLocaleString('tr-TR')}</time></button>`).join(''):'<p>Henüz bildirimin yok.</p>';if(rows?.some(n=>!n.read_at))await sb(`/rest/v1/notifications?user_id=eq.${session.user.id}&read_at=is.null`,{method:'PATCH',body:{read_at:new Date().toISOString()}});updateNotificationCount()}catch(err){$('#notificationsView').innerHTML=`<p>${esc(err.message)}</p>`}}
 async function reportComment(id){if(!requireSession())return;const reason=prompt('Bu yorumla ilgili itiraz nedenini yaz:');if(!reason?.trim())return;try{await sb('/rest/v1/reports',{method:'POST',body:{reporter_id:session.user.id,target_type:'comment',target_id:id,reason:reason.trim()}});alert('İtirazın yöneticiye iletildi.')}catch(err){alert(err.message)}}
 async function reportStory(id){if(!requireSession())return;const reason=prompt('Bu hikâyeyi bildirme nedenini yaz:');if(!reason?.trim())return;try{await sb('/rest/v1/reports',{method:'POST',body:{reporter_id:session.user.id,target_type:'story',target_id:id,reason:reason.trim()}});alert('Bildirimin yöneticiye iletildi.')}catch(err){alert(err.message)}}
-function closeBookPage(){document.body.classList.remove('book-mode');bookPage.hidden=true;readerState=null;history.pushState(null,'','#kesfet');scrollTo({top:document.querySelector('#kesfet').offsetTop-70,behavior:'smooth'})}
+function closeBookPage(){document.body.classList.remove('book-mode');bookPage.hidden=true;readerState=null;readingMode=false;history.pushState(null,'','#kesfet');scrollTo({top:document.querySelector('#kesfet').offsetTop-70,behavior:'smooth'})}
 async function openAdmin(){if(!currentProfile?.is_admin)return;accountDialog.close();adminDialog.showModal();$('#adminView').innerHTML='Yönetim verileri yükleniyor…';try{const [reports,comments,notifications,profiles]=await Promise.all([sb('/rest/v1/reports?select=id,reporter_id,target_type,target_id,reason,status,created_at&order=created_at.desc&limit=100'),sb('/rest/v1/chapter_comments?select=id,user_id,message,created_at&order=created_at.desc&limit=100'),sb('/rest/v1/notifications?select=id,user_id,title,body,created_at&order=created_at.desc&limit=100'),sb('/rest/v1/profiles?select=id,display_name')]),names=Object.fromEntries((profiles||[]).map(p=>[p.id,p.display_name]));$('#adminView').innerHTML=`<div class="admin-stats"><b>${reports?.filter(r=>r.status==='open').length||0}<small>Açık itiraz</small></b><b>${comments?.length||0}<small>Son yorum</small></b><b>${notifications?.length||0}<small>Bildirim</small></b></div><div class="admin-columns"><section><h3>İtirazlar</h3>${reports?.length?reports.map(r=>`<article><b>${esc(names[r.reporter_id]||'Kullanıcı')}</b><span>${esc(r.reason)}</span><small>${esc(r.status)}</small>${r.status==='open'?`<button data-close-report="${r.id}">İncelendi olarak işaretle</button>`:''}</article>`).join(''):'<p>İtiraz yok.</p>'}</section><section><h3>Yorumlar</h3>${comments?.length?comments.map(c=>`<article><b>${esc(names[c.user_id]||'Kullanıcı')}</b><span>${esc(c.message)}</span><button class="danger-button" data-admin-delete-comment="${c.id}">Yorumu sil</button></article>`).join(''):'<p>Yorum yok.</p>'}</section><section><h3>Bildirimler</h3>${notifications?.length?notifications.map(n=>`<article><b>${esc(names[n.user_id]||'Kullanıcı')}</b><span>${esc(n.title)}</span><small>${new Date(n.created_at).toLocaleDateString('tr-TR')}</small></article>`).join(''):'<p>Bildirim yok.</p>'}</section></div>`}catch(err){$('#adminView').innerHTML=`<p>${esc(err.message)}</p>`}}
 
 render();renderRankings();loadStories();updateSessionUi();
@@ -64,7 +66,8 @@ document.addEventListener('click',async e=>{
   const manageTab=e.target.closest('[data-manage-tab]');if(manageTab)renderManage(manageTab.dataset.manageTab);
   const deleteButton=e.target.closest('[data-delete-book]');if(deleteButton)deleteBook(deleteButton.dataset.deleteBook,deleteButton.dataset.bookTitle);
   if(e.target.closest('[data-new-story]')){accountDialog.close();writeDialog.showModal()}
-  if(e.target.closest('[data-start-reading]'))document.querySelector('.reading-zone')?.scrollIntoView({behavior:'smooth',block:'start'});
+  if(e.target.closest('[data-start-reading]'))openReadingPage(readerState.index);
+  const chapterChoice=e.target.closest('[data-chapter-index]');if(chapterChoice)openReadingPage(Number(chapterChoice.dataset.chapterIndex),Number(chapterChoice.dataset.chapterIndex)>readerState.index?'turn-forward':'turn-back');
   if(e.target.closest('[data-notifications]'))openNotifications();
   if(e.target.closest('[data-admin]'))openAdmin();
   const follow=e.target.closest('[data-follow]');if(follow)toggleFollow(follow.dataset.follow);
@@ -77,8 +80,9 @@ document.addEventListener('click',async e=>{
   if(e.target.closest('[data-write]'))session?writeDialog.showModal():authDialog.showModal();
   if(e.target.matches('[data-close]'))e.target.closest('dialog').close();
   if(e.target.closest('[data-reader-close]'))closeBookPage();
-  if(e.target.closest('[data-prev]')&&!e.target.disabled){readerState.index--;renderReader('turn-back')}
-  if(e.target.closest('[data-next]')&&!e.target.disabled){readerState.index++;renderReader('turn-forward')}
+  if(e.target.closest('[data-reading-close]'))closeReadingPage();
+  if(e.target.closest('[data-prev]')&&!e.target.disabled){readerState.index--;readingMode?openReadingPage(readerState.index,'turn-back'):renderReader('turn-back')}
+  if(e.target.closest('[data-next]')&&!e.target.disabled){readerState.index++;readingMode?openReadingPage(readerState.index,'turn-forward'):renderReader('turn-forward')}
   if(e.target.closest('[data-like]'))toggleLike();if(e.target.closest('[data-save]'))toggleLibrary();
   if(e.target.closest('[data-logout]')){session=null;currentProfile=null;localStorage.removeItem('fasl-session');accountDialog.close();updateSessionUi()}
   if(e.target.closest('#closeSearch,.brand,a[href="#kesfet"]'))exitSearch()
@@ -96,3 +100,25 @@ $('#manageView').addEventListener('submit',async e=>{e.preventDefault();const fo
 const draftText=$('#draftText'),saveState=$('#saveState');function saveDraft(){localStorage.setItem('fasl-draft',JSON.stringify({title:$('#draftTitle').value,genre:$('#draftGenre').value,tags:$('#draftTags').value,text:draftText.value}));saveState.textContent='Kaydedildi'}$('#saveDraft').onclick=saveDraft;draftText.oninput=()=>{$('#wordCount').textContent=`${draftText.value.trim()?draftText.value.trim().split(/\s+/).length:0} kelime`;saveState.textContent='Kaydedilmedi'};
 $('#writeForm').onsubmit=async e=>{e.preventDefault();const title=$('#draftTitle').value.trim(),genre=$('#draftGenre').value.trim()||'Genç Kurgu',tags=$('#draftTags').value.split(',').map(x=>x.trim()).filter(Boolean).slice(0,8),content=draftText.value.trim();saveState.textContent='Yayımlanıyor…';try{const slug=title.toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,70)+'-'+Date.now().toString(36),rows=await sb('/rest/v1/stories',{method:'POST',body:{author_id:session.user.id,title,slug,summary:content.slice(0,280),genre,tags,status:'ongoing',visibility:'public',published_at:new Date().toISOString()}});await sb('/rest/v1/chapters',{method:'POST',body:{story_id:rows[0].id,title:'1. Fasıl',position:1,content,is_published:true,published_at:new Date().toISOString()}});localStorage.removeItem('fasl-draft');writeDialog.close();e.target.reset();saveState.textContent='Taslak';await loadStories()}catch(err){saveState.textContent='Hata: '+err.message}};
 const saved=JSON.parse(localStorage.getItem('fasl-draft')||'null');if(saved){$('#draftTitle').value=saved.title||'';$('#draftGenre').value=saved.genre||'';$('#draftTags').value=saved.tags||'';draftText.value=saved.text||'';draftText.dispatchEvent(new Event('input'));saveState.textContent='Kaydedildi'}
+function openReadingPage(index=0,direction=''){
+  if(!readerState?.chapters?.length)return;
+  readingMode=true;
+  document.body.classList.add('reading-mode');
+  readerState.index=Math.max(0,Math.min(Number(index)||0,readerState.chapters.length-1));
+  history.pushState({reading:readerState.story.id,chapter:readerState.index},'',`#oku/${encodeURIComponent(readerState.story.id)}/${readerState.index+1}`);
+  renderReadingPage(direction);
+  scrollTo({top:0,behavior:'smooth'});
+}
+async function renderReadingPage(direction=''){
+  const {story,chapters,index}=readerState,chapter=chapters[index];
+  bookPageView.innerHTML=`<div class="immersive-reader"><header class="reading-topbar"><details class="chapter-picker"><summary><span class="reader-mini-cover" style="background:linear-gradient(145deg,${story.color},${story.accent})"><b>${esc(story.title.slice(0,1))}</b></span><span><strong>${esc(story.title)}</strong><small>${esc(chapter.title)} · ${index+1}/${chapters.length}</small></span><i>⌄</i></summary><div class="chapter-menu"><div class="chapter-menu-title"><b>${esc(story.title)}</b><small>${esc(story.author)}</small></div>${chapters.map((item,i)=>`<button class="${i===index?'active':''}" data-chapter-index="${i}"><span>${String(i+1).padStart(2,'0')}</span>${esc(item.title)}</button>`).join('')}</div></details><span class="mini-brand">fasl.</span><button class="reader-exit" data-reading-close>Kitaba dön ×</button></header><main class="reading-canvas"><div class="reading-chapter-meta"><span class="kicker">${esc(story.title.toUpperCase())}</span><h1>${esc(chapter.title)}</h1><button class="author-link" ${story.authorId?`data-author="${story.authorId}"`:''}>${esc(story.author)}</button></div><article class="book-page ${direction}"><div class="book-text">${esc(chapter.content)}</div></article><nav class="page-nav"><button data-prev ${index===0?'disabled':''}>← Önceki fasıl</button><span>${index+1} / ${chapters.length}</span><button data-next ${index===chapters.length-1?'disabled':''}>Sonraki fasıl →</button></nav><section class="comments"><h3>Bu fasıl hakkında</h3><div id="commentList">Yorumlar yükleniyor…</div><form id="commentForm"><textarea maxlength="800" placeholder="Yorumunu yaz…" required></textarea><button class="ink">Yorum gönder</button></form></section></main></div>`;
+  if(readerState.demo){$('#commentList').innerHTML='<p>Yorumlar yayımlanan Fasl hikâyelerinde kullanılabilir.</p>';$('#commentForm').hidden=true}else await loadComments();
+}
+function closeReadingPage(){
+  if(!readerState)return;
+  readingMode=false;
+  document.body.classList.remove('reading-mode');
+  history.pushState({book:readerState.story.id},'',`#kitap/${encodeURIComponent(readerState.story.id)}`);
+  renderReader();
+  scrollTo({top:0,behavior:'smooth'});
+}
