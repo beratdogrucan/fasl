@@ -1,2 +1,3 @@
 .form-message{min-height:18px!important;margin:8px 0!important;font:12px/1.4 'DM Sans'!important;color:var(--red)!important}
 #nameField[hidden]{display:none!important}
+.chapter-reader{margin-top:26px}.chapter-reader section+section{margin-top:42px;padding-top:28px;border-top:1px solid var(--line)}.chapter-reader h3{font:500 27px 'Fraunces';margin:0 0 14px}.chapter-reader p{white-space:pre-wrap}
