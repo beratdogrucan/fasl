@@ -72,7 +72,7 @@ async function openAdmin(){if(!currentProfile?.is_admin)return;accountDialog.clo
 
 render();renderRankings();loadStories();updateSessionUi();
 document.addEventListener('click',async e=>{
-  const infoLink=e.target.closest('a[href="#kosullar"],a[href="#gizlilik"],a[href="#yardim"]');if(infoLink){e.preventDefault();openInfoPage(infoLink.getAttribute('href').slice(1));return}
+  const infoLink=e.target.closest('a[href="#kosullar"],a[href="#topluluk-kurallari"],a[href="#gizlilik"],a[href="#yardim"]');if(infoLink){e.preventDefault();openInfoPage(infoLink.getAttribute('href').slice(1));return}
   const notification=e.target.closest('[data-notification-story]');if(notification){e.preventDefault();await openNotificationStory(notification);return}
   if(e.target.closest('[data-read-all-notifications]')){await markAllNotificationsRead();return}
   const resumeStory=e.target.closest('[data-resume-story]');if(resumeStory){e.preventDefault();libraryDialog.open&&libraryDialog.close();await openStory(resumeStory.dataset.resumeStory);openReadingPage(readerState?.resumeIndex||0);return}
@@ -158,6 +158,15 @@ const infoPages={
     ['4. İçerik denetimi','Bildirilen içerikler yönetici tarafından incelenebilir. Kuralları ihlal eden içerikler kaldırılabilir; ağır veya tekrarlanan ihlallerde hesap erişimi sınırlandırılabilir.'],
     ['5. Hizmetin işleyişi','Fasl geliştirme aşamasındadır. Özellikler değişebilir, geçici kesintiler yaşanabilir ve bakım yapılabilir. Veri kaybına karşı kendi eserlerinin bir kopyasını saklamanı öneririz.'],
     ['6. Koşullardaki değişiklikler','Koşullar önemli ölçüde değiştiğinde bu sayfa güncellenir. Fasl’ı kullanmaya devam etmen güncel koşulları kabul ettiğin anlamına gelir.']
+  ]},
+  'topluluk-kurallari':{kicker:'BİRLİKTE ANLATIYORUZ',title:'Topluluk Kuralları',intro:'Fasl; yazarların özgürce üretebildiği, okurların kendini güvende hissettiği saygılı bir hikâye topluluğudur.',sections:[
+    ['Saygılı iletişim','Yorumlarda, profillerde ve hikâyelerde tehdit, taciz, aşağılama, zorbalık, hedef gösterme ve nefret söylemine izin verilmez. Bir eseri eleştirebilirsin; fakat yazarına veya okurlarına saldırmamalısın.'],
+    ['Telif ve özgünlük','Yalnızca kendi yazdığın veya yayımlama hakkına sahip olduğun içerikleri paylaşabilirsin. Başkasının kitabını, çevirisini, görselini ya da karakterlerini izin almadan kopyalamak yasaktır. Alıntılar kısa tutulmalı ve kaynağı belirtilmelidir.'],
+    ['Yaş ve içerik uyarıları','Şiddet, cinsellik, kendine zarar verme, bağımlılık, istismar veya benzeri hassas konular içeren hikâyeler uygun etiket ve açık içerik uyarısıyla yayımlanmalıdır. Çocukların güvenliğini ihlal eden hiçbir içeriğe izin verilmez.'],
+    ['Yasak içerikler','Yasa dışı faaliyetleri teşvik eden, kişisel bilgileri ifşa eden, dolandırıcılık veya spam içeren, gerçek kişilere yönelik tehdit oluşturan ve açıkça zarar vermeyi amaçlayan içerikler kaldırılır.'],
+    ['Bildirme ve inceleme','Bir hikâyeyi kitap sayfasındaki “Hikâyeyi bildir” seçeneğiyle, bir yorumu ise yanındaki “İtiraz et” bağlantısıyla bildirebilirsin. Bildirim yapmak içeriği otomatik kaldırmaz; yönetici bağlamıyla birlikte inceler.'],
+    ['Uygulanabilecek yaptırımlar','İhlalin ağırlığına göre içerik uyarısı, içeriğin kaldırılması, özelliklerin sınırlandırılması veya hesabın kapatılması uygulanabilir. Tekrarlanan ve ağır ihlallerde doğrudan hesap işlemi yapılabilir.'],
+    ['Güvenliğini koru','Adres, telefon, şifre, kimlik bilgisi veya konum gibi özel bilgileri paylaşma. Başka biri adına hesap açma ve kimliğe bürünme yasaktır. Acil bir tehlike durumunda yalnızca platform bildirimine güvenmeyip yerel acil yardım birimlerine ulaş.']
   ]},
   gizlilik:{kicker:'VERİLERİN VE SEN',title:'Gizlilik Politikası',intro:'Bu sayfa Fasl’ın hangi bilgileri neden kullandığını sade bir dille açıklar.',sections:[
     ['Topladığımız bilgiler','Hesap oluşturduğunda e-posta adresin, görünen adın, kullanıcı adın ve profil açıklaman saklanır. Yazdığın hikâyeler, bölümler, yorumlar, beğeniler, kütüphane seçimleri, takipler, bildirimler ve içerik bildirimleri de hizmetin çalışması için işlenir.'],
