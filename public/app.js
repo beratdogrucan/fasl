@@ -67,6 +67,7 @@ async function openAdmin(){if(!currentProfile?.is_admin)return;accountDialog.clo
 
 render();renderRankings();loadStories();updateSessionUi();
 document.addEventListener('click',async e=>{
+  const infoLink=e.target.closest('a[href="#kosullar"],a[href="#gizlilik"],a[href="#yardim"]');if(infoLink){e.preventDefault();openInfoPage(infoLink.getAttribute('href').slice(1));return}
   const author=e.target.closest('[data-author]');if(author){e.preventDefault();openAuthor(author.dataset.author);return}
   const card=e.target.closest('[data-story]');if(card){e.preventDefault();[libraryDialog,accountDialog,notificationsDialog,authorDialog].forEach(d=>d.open&&d.close());openStory(card.dataset.story)}
   const manage=e.target.closest('[data-manage]');if(manage)openManage(manage.dataset.manage,manage.dataset.tab);
@@ -88,6 +89,7 @@ document.addEventListener('click',async e=>{
   if(e.target.matches('[data-close]'))e.target.closest('dialog').close();
   if(e.target.closest('[data-reader-close]'))closeBookPage();
   if(e.target.closest('[data-reading-close]'))closeReadingPage();
+  if(e.target.closest('[data-info-close]'))closeInfoPage();
   if(e.target.closest('[data-prev]')&&!e.target.disabled){readerState.index--;readingMode?openReadingPage(readerState.index,'turn-back'):renderReader('turn-back')}
   if(e.target.closest('[data-next]')&&!e.target.disabled){readerState.index++;readingMode?openReadingPage(readerState.index,'turn-forward'):renderReader('turn-forward')}
   if(e.target.closest('[data-like]'))toggleLike();if(e.target.closest('[data-save]'))toggleLibrary();
@@ -130,3 +132,34 @@ function closeReadingPage(){
   renderReader();
   scrollTo({top:0,behavior:'smooth'});
 }
+const infoPages={
+  kosullar:{kicker:'FASL HAKKINDA',title:'Kullanım Koşulları',intro:'Fasl’ı kullanarak aşağıdaki topluluk ve kullanım koşullarını kabul etmiş olursun.',sections:[
+    ['1. Hesabın','Fasl’da herkes aynı hesapla hem okuyucu hem yazar olabilir. Kayıt bilgilerinin doğru ve güncel tutulmasından, şifrenin korunmasından ve hesabında gerçekleşen işlemlerden sen sorumlusun.'],
+    ['2. Hikâyeler ve hakların','Yayımladığın hikâyelerin sahibi sensin. Fasl’a yalnızca içeriğini platformda göstermek, dağıtmak ve okurlara ulaştırmak için gerekli kullanım iznini verirsin. Başkasına ait bir eseri izinsiz yayımlayamazsın.'],
+    ['3. Topluluk kuralları','Tehdit, taciz, nefret söylemi, kişisel bilgi paylaşımı, spam, yasa dışı içerik ve başkalarının haklarını ihlal eden paylaşımlar yasaktır. Yorumlar ve hikâyeler kullanıcılar tarafından bildirilebilir.'],
+    ['4. İçerik denetimi','Bildirilen içerikler yönetici tarafından incelenebilir. Kuralları ihlal eden içerikler kaldırılabilir; ağır veya tekrarlanan ihlallerde hesap erişimi sınırlandırılabilir.'],
+    ['5. Hizmetin işleyişi','Fasl geliştirme aşamasındadır. Özellikler değişebilir, geçici kesintiler yaşanabilir ve bakım yapılabilir. Veri kaybına karşı kendi eserlerinin bir kopyasını saklamanı öneririz.'],
+    ['6. Koşullardaki değişiklikler','Koşullar önemli ölçüde değiştiğinde bu sayfa güncellenir. Fasl’ı kullanmaya devam etmen güncel koşulları kabul ettiğin anlamına gelir.']
+  ]},
+  gizlilik:{kicker:'VERİLERİN VE SEN',title:'Gizlilik Politikası',intro:'Bu sayfa Fasl’ın hangi bilgileri neden kullandığını sade bir dille açıklar.',sections:[
+    ['Topladığımız bilgiler','Hesap oluşturduğunda e-posta adresin, görünen adın, kullanıcı adın ve profil açıklaman saklanır. Yazdığın hikâyeler, bölümler, yorumlar, beğeniler, kütüphane seçimleri, takipler, bildirimler ve içerik bildirimleri de hizmetin çalışması için işlenir.'],
+    ['Bilgileri neden kullanıyoruz?','Hesabını açmak, girişini güvenli tutmak, eserlerini yayımlamak, okuma ilerlemeni göstermek, etkileşimleri sunmak, bildirim göndermek ve topluluk güvenliğini sağlamak için kullanırız.'],
+    ['Hizmet sağlayıcılarımız','Kimlik doğrulama ve veritabanı hizmetleri Supabase; yayınlama, güvenlik ve içerik dağıtımı Cloudflare altyapısı üzerinden sağlanır. Bu sağlayıcılar verileri kendi güvenlik ve gizlilik şartları kapsamında işler.'],
+    ['Paylaşılan bilgiler','Profil adın, kullanıcı adın, biyografin ve herkese açık yayımladığın eserler diğer kullanıcılara görünür. E-posta adresin herkese açık gösterilmez. Verilerin reklam amacıyla satılmaz.'],
+    ['Saklama ve güvenlik','Bilgiler hesabın ve hizmet için gerekli olduğu sürece saklanır. Erişimi sınırlandırmak ve bağlantıları korumak için makul güvenlik önlemleri kullanılır; ancak hiçbir çevrimiçi sistem mutlak güvenlik garantisi veremez.'],
+    ['Tercihlerin ve hakların','Profilini Hesabım bölümünden güncelleyebilir, kitaplarını silebilir ve hesabınla ilgili yardım isteyebilirsin. Hesap veya veri silme talebi için Yardım sayfasındaki adımları kullanabilirsin.']
+  ]},
+  yardim:{kicker:'BURADAYIZ',title:'Yardım Merkezi',intro:'Fasl’da en sık ihtiyaç duyulan işlemler için hızlı yanıtlar.',sections:[
+    ['Nasıl hesap oluştururum?','Sağ üstteki Giriş yap düğmesine bas, Kayıt ol sekmesini seç ve görünen ad, e-posta ile şifreni yaz. E-posta doğrulaması istenirse gelen bağlantıyı aç.'],
+    ['Giriş yapamıyorum','E-posta ve şifreni kontrol et. Şifreni unuttuysan giriş ekranındaki “Şifremi unuttum” bağlantısını kullan. Oturum süresi doldu uyarısında “Tekrar giriş yap” seçeneğine bas.'],
+    ['Nasıl hikâye yayımlarım?','Hesabım → Yeni hikâye oluştur bölümünden eserini başlat. Kendi Kitaplarım alanındaki “Yazmaya devam et” düğmesiyle yeni bölümler ekleyebilirsin.'],
+    ['Kitap ve bölümlerimi nasıl düzenlerim?','Hesabım → Kendi Kitaplarım bölümünde her eser için Düzenle, Yazmaya devam et ve Sil seçenekleri bulunur. Silme işlemi geri alınamaz.'],
+    ['Bir içeriği nasıl bildiririm?','Kitap sayfasındaki “Hikâyeyi bildir” seçeneğini veya yorumların yanındaki “İtiraz et” bağlantısını kullan. Bildirim yönetici panelinde incelenir.'],
+    ['Hesabımı veya verilerimi silmek istiyorum','Şimdilik Hesabım bölümünden kitaplarını ayrı ayrı silebilirsin. Tam hesap silme talebi için yöneticiye yardım talebi ilet; kimliğini doğruladıktan sonra talebin işleme alınır.']
+  ]}
+};
+function openInfoPage(key,updateHistory=true){const page=infoPages[key];if(!page)return;exitSearch();document.body.classList.remove('book-mode','reading-mode');document.body.classList.add('info-mode');bookPage.hidden=true;$('#infoPage').hidden=false;$('#infoPageView').innerHTML=`<span class="kicker">${page.kicker}</span><h1>${page.title}</h1><p class="info-intro">${page.intro}</p><p class="info-updated">Son güncelleme: 9 Ağustos 2026</p><div class="info-sections">${page.sections.map(([title,text])=>`<section><h2>${title}</h2><p>${text}</p></section>`).join('')}</div>`;if(updateHistory)history.pushState({info:key},'',`#${key}`);scrollTo({top:0,behavior:'smooth'})}
+function closeInfoPage(){document.body.classList.remove('info-mode');$('#infoPage').hidden=true;history.pushState(null,'','#');scrollTo({top:0,behavior:'smooth'})}
+function openInfoFromHash(){const key=location.hash.slice(1);if(infoPages[key])openInfoPage(key,false)}
+openInfoFromHash();
+addEventListener('popstate',()=>{const key=location.hash.slice(1);if(infoPages[key])openInfoPage(key,false);else if(document.body.classList.contains('info-mode')){document.body.classList.remove('info-mode');$('#infoPage').hidden=true;scrollTo({top:0})}});
