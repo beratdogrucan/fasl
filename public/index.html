@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,650&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/live.css"><link rel="stylesheet" href="/features.css">
+  <link rel="stylesheet" href="/experience.css">
 </head>
 <body>
   <header class="topbar">
@@ -49,6 +50,7 @@
     <section class="rankings" id="one-cikanlar"><div class="section-head"><div><span class="kicker">FASL'DA ÖNE ÇIKANLAR</span><h2>Okurların seçtikleri</h2></div></div><div class="ranking-columns"><div><h3>En çok okunanlar</h3><div id="mostRead" class="ranking-list"></div></div><div><h3>En çok beğenilenler</h3><div id="mostLiked" class="ranking-list"></div></div></div></section>
 
     <section class="manifesto" id="topluluk"><span>01</span><h2>Bir okurla başlayan şey,<br><em>bir topluluğa dönüşür.</em></h2><p>Yorumlarla yazara eşlik et, listelerini oluştur ve sevdiğin hikâyelerin büyümesine yardım et.</p><button class="paper" data-auth>Topluluğa katıl →</button></section>
+    <section class="mood-discovery" id="ruh-haline-gore"><div class="mood-shell"><div class="mood-copy"><span class="kicker">O ANKİ HİSSİNE GÖRE</span><h2>Bugün nasıl bir hikâye istersin?</h2><p>Ruh hâlini seç; Fasl sana uygun dünyaları öne çıkarsın.</p><div class="mood-actions" id="moodActions"><button data-mood="heyecan">⚡ Heyecanlı</button><button data-mood="duygusal">♡ Duygusal</button><button data-mood="gizem">◐ Gizemli</button><button data-mood="kacis">✦ Başka dünyalara kaçış</button><button data-mood="rahat">☁ Sakin</button></div><button class="surprise-me" id="surpriseMe"><span>✦</span><b>Beni şaşırt</b><small>Senin için rastgele bir hikâye seçelim</small></button></div><div class="mood-result"><span id="moodResultLabel">Sana uygun seçkiler</span><div class="story-grid" id="moodStories"></div></div></div></section>
   </main>
 
   <dialog id="storyDialog" class="story-dialog"><button class="close" data-close>×</button><div id="storyView"></div></dialog>
